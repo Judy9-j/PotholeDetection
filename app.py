@@ -3,6 +3,22 @@ from ultralytics import YOLO
 from PIL import Image
 import tempfile
 from datetime import datetime
+from supabase import create_client, Client
+
+# =========================================================
+# إعدادات Supabase
+# =========================================================
+SUPABASE_URL = "https://vdbjghnfihweblluqsmy.supabase.co"
+SUPABASE_KEY = "sb_publishable_ljA_u87H8J10nDE0zu_2CQ_BFsGKq_8"
+
+@st.cache_resource
+def init_supabase():
+    try:
+        return create_client(SUPABASE_URL, SUPABASE_KEY)
+    except Exception as e:
+        return None
+
+supabase = init_supabase()
 
 # إعداد الصفحة
 st.set_page_config(
