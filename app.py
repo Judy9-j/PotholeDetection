@@ -17,7 +17,7 @@ st.set_page_config(
 # تحميل ملف الاستايل الخارجي إذا كان موجوداً
 if os.path.exists("style.css"):
     with open("style.css") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_dict=f)
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # 2. الإعداد والربط بقاعدة بيانات Supabase
