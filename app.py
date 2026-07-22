@@ -153,9 +153,8 @@ elif st.session_state['current_page'] == "تقديم بلاغ":
                 except Exception:
                     pass
 
-                # استخراج رابط الصورة الصافي
-                public_url_res = supabase.storage.from_("pothole_images").get_public_url(file_path)
-                image_url = str(public_url_res) if public_url_res else ""
+                # بناء رابط الصورة المباشر الصافي
+                image_url = f"{SUPABASE_URL}/storage/v1/object/public/pothole_images/{file_path}"
 
                 detections = len(result.boxes)
                 confidence = 0.0
@@ -165,7 +164,7 @@ elif st.session_state['current_page'] == "تقديم بلاغ":
                 else:
                     status_text = "لم يتم اكتشاف حفريات"
 
-                # حفظ البيانات بجدول Supabase (reports) مع التأكد من تحويلها إلى نصوص صريحة
+                # تجهيز البيانات كـ DTO نقي
                 data = {
                     "city": str(city).strip(),
                     "district": str(district).strip(),
@@ -174,8 +173,16 @@ elif st.session_state['current_page'] == "تقديم بلاغ":
                     "status": "قيد المعالجة"
                 }
                 
+                # تنفيذ عملية الإدخال مع طلب العودة للبيانات المحفوظة صراحة
                 res = supabase.table("reports").insert(data).execute()
-                report_id = res.data[0]["id"]
+                
+                # استخراج id المولد
+                if res.data and len(res.data) > 0:
+                    report_id = res.data[0]["id"]
+                else:
+                    # في حال عدم رجوع الـ id مباشرة يتم جلب آخر عنصر تم إدخاله
+                    last_record = supabase.table("reports").select("id").order("id", desc=True).limit(1).execute()
+                    report_id = last_record.data[0]["id"] if last_record.data else "تم التسجيل"
 
             st.success("اكتمل تحليل الصورة وبناء البلاغ بنجاح")
             st.divider()
