@@ -150,10 +150,12 @@ elif st.session_state['current_page'] == "تقديم بلاغ":
                     supabase.storage.from_("pothole_images").upload(
                         file_path, detected_bytes, {"content-type": "image/jpeg"}
                     )
-                    image_url = supabase.storage.from_("pothole_images").get_public_url(file_path)
                 except Exception:
-                    # في حال وجود ملف بنفس الاسم سابقاً
-                    image_url = supabase.storage.from_("pothole_images").get_public_url(file_path)
+                    pass
+
+                # استخراج رابط الصورة الصافي
+                public_url_res = supabase.storage.from_("pothole_images").get_public_url(file_path)
+                image_url = str(public_url_res) if public_url_res else ""
 
                 detections = len(result.boxes)
                 confidence = 0.0
@@ -163,14 +165,15 @@ elif st.session_state['current_page'] == "تقديم بلاغ":
                 else:
                     status_text = "لم يتم اكتشاف حفريات"
 
-                # حفظ البيانات بجدول Supabase (reports)
+                # حفظ البيانات بجدول Supabase (reports) مع التأكد من تحويلها إلى نصوص صريحة
                 data = {
-                    "city": city,
-                    "district": district,
-                    "street": street,
-                    "image_url": image_url,
+                    "city": str(city).strip(),
+                    "district": str(district).strip(),
+                    "street": str(street).strip(),
+                    "image_url": str(image_url),
                     "status": "قيد المعالجة"
                 }
+                
                 res = supabase.table("reports").insert(data).execute()
                 report_id = res.data[0]["id"]
 
