@@ -236,8 +236,12 @@ elif st.session_state['current_page'] == "متابعة بلاغ":
                 st.write(f"**حالة البلاغ الحالية:** {found_report['status']}")
                 st.write(f"**الموقع:** {found_report['city']} - حي {found_report['district']} - شارع {found_report['street']}")
                 st.divider()
-                if found_report.get('image_url'):
-                    st.image(found_report['image_url'], caption="الصورة المحللة للبلاغ", use_container_width=True)
+                
+                img_link = found_report.get('image_url')
+                if img_link and img_link.startswith("http"):
+                    st.image(img_link, caption="الصورة المحللة للبلاغ", use_container_width=True)
+                else:
+                    st.info("لا تتوفر صورة محللة لهذا البلاغ.")
             else:
                 st.error("لم يتم العثور على بلاغ بهذا الرقم. الرجاء التأكد من الرقم والمحاولة مرة أخرى.")
 
@@ -310,8 +314,11 @@ elif st.session_state['current_page'] == "دخول البلدية":
                 with st.expander(f"بلاغ رقم {report['id']} - {report['city']} ({report['district']}) | الحالة: {report['status']}"):
                     col1, col2 = st.columns([1, 2])
                     with col1:
-                        if report.get('image_url'):
-                            st.image(report['image_url'], caption="صورة الحفرية المكتشفة", use_container_width=True)
+                        img_link = report.get('image_url')
+                        if img_link and img_link.startswith("http"):
+                            st.image(img_link, caption="صورة الحفرية المكتشفة", use_container_width=True)
+                        else:
+                            st.info("لا تتوفر صورة لهذا البلاغ")
                     with col2:
                         st.write(f"**رقم البلاغ:** {report['id']}")
                         st.write(f"**الشارع:** {report['street']}")
