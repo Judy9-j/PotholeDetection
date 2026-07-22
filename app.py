@@ -153,7 +153,7 @@ elif st.session_state['current_page'] == "تقديم بلاغ":
                 except Exception:
                     pass
 
-                # بناء رابط الصورة المباشر الصافي
+                # بناء رابط الصورة العام المباشر
                 image_url = f"{SUPABASE_URL}/storage/v1/object/public/pothole_images/{file_path}"
 
                 detections = len(result.boxes)
@@ -164,7 +164,7 @@ elif st.session_state['current_page'] == "تقديم بلاغ":
                 else:
                     status_text = "لم يتم اكتشاف حفريات"
 
-                # تجهيز البيانات كـ DTO نقي
+                # حفظ البيانات بجدول Supabase (reports)
                 data = {
                     "city": str(city).strip(),
                     "district": str(district).strip(),
@@ -173,16 +173,15 @@ elif st.session_state['current_page'] == "تقديم بلاغ":
                     "status": "قيد المعالجة"
                 }
                 
-                # تنفيذ عملية الإدخال مع طلب العودة للبيانات المحفوظة صراحة
-                res = supabase.table("reports").insert(data).execute()
-                
-                # استخراج id المولد
-                if res.data and len(res.data) > 0:
-                    report_id = res.data[0]["id"]
-                else:
-                    # في حال عدم رجوع الـ id مباشرة يتم جلب آخر عنصر تم إدخاله
-                    last_record = supabase.table("reports").select("id").order("id", desc=True).limit(1).execute()
-                    report_id = last_record.data[0]["id"] if last_record.data else "تم التسجيل"
+                try:
+                    res = supabase.table("reports").insert(data).execute()
+                    if res.data and len(res.data) > 0:
+                        report_id = res.data[0]["id"]
+                    else:
+                        report_id = "تم التسجيل"
+                except Exception as e:
+                    st.error(f"تفاصيل الخطأ الدقيقة من Supabase: {e}")
+                    st.stop()
 
             st.success("اكتمل تحليل الصورة وبناء البلاغ بنجاح")
             st.divider()
