@@ -7,15 +7,13 @@ import base64
 from datetime import datetime
 from supabase import create_client, Client
 
-# =========================================================
-# 0. إعداد الصفحة والاتصال بـ Supabase
-# =========================================================
+
+# 1. إعداد الصفحة والاتصال بـ Supabase
 st.set_page_config(
     page_title="نظام كشف الحفريات ومتابعتها",
     layout="wide"
 )
 
-# الاتصال بـ Supabase باستخدام Secrets
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
@@ -26,16 +24,13 @@ def init_supabase() -> Client:
 supabase = init_supabase()
 
 
-# --- دالتان لمعالجة تحويل الصور والتخزين في قاعدة البيانات ---
 def image_to_base64(img: Image.Image) -> str:
-    """تحويل كائن الصورة إلى نص Base64 للحفظ الدائم في Supabase."""
     buffered = io.BytesIO()
     img.save(buffered, format="JPEG")
     return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
 
 def base64_to_image(base64_str: str):
-    """تحويل نص Base64 إلى كائن صورة لعرضه في Streamlit."""
     if not base64_str:
         return None
     try:
@@ -45,14 +40,12 @@ def base64_to_image(base64_str: str):
         return None
 
 
-# تهيئة متغيرات الجلسة (Session State)
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
 
 if "current_page" not in st.session_state:
     st.session_state["current_page"] = "الرئيسية"
 
-# تحميل ملف التنسيقات CSS
 try:
     with open("style.css", encoding="utf-8") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -68,9 +61,9 @@ def load_model():
 model = load_model()
 
 
-# =========================================================
-# 1. الصفحة الرئيسية
-# =========================================================
+
+# 2. الصفحة الرئيسية
+
 if st.session_state["current_page"] == "الرئيسية":
 
     st.markdown('<div class="main-title">نظام كشف الحفريات ومتابعتها</div>', unsafe_allow_html=True)
@@ -117,9 +110,8 @@ if st.session_state["current_page"] == "الرئيسية":
             st.rerun()
 
 
-# =========================================================
+
 # 2. صفحة تقديم بلاغ
-# =========================================================
 elif st.session_state["current_page"] == "تقديم بلاغ":
 
     if st.button("العودة للقائمة الرئيسية", key="back_home1"):
@@ -171,11 +163,9 @@ elif st.session_state["current_page"] == "تقديم بلاغ":
                 else:
                     status = "لم يتم اكتشاف حفريات"
 
-                # تحويل الصور إلى Base64 للتخزين الدائم في Supabase
                 orig_b64 = image_to_base64(image)
                 det_b64 = image_to_base64(detected_image)
 
-                # تجهيز البيانات وإرسالها لـ Supabase
                 new_report_data = {
                     "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
                     "city": city,
@@ -218,9 +208,7 @@ elif st.session_state["current_page"] == "تقديم بلاغ":
             st.success(f"تم تسجيل البلاغ وإرساله للبلدية بنجاح. رقم البلاغ الخاص بك هو: {inserted_id}")
 
 
-# =========================================================
-# 3. صفحة متابعة بلاغ
-# =========================================================
+# 4. صفحة متابعة بلاغ
 elif st.session_state["current_page"] == "متابعة بلاغ":
 
     if st.button("العودة للقائمة الرئيسية", key="back_home_track"):
@@ -252,7 +240,6 @@ elif st.session_state["current_page"] == "متابعة بلاغ":
                 st.write(f"**عدد الحفريات المكتشفة:** {found_report['detections']}")
                 st.divider()
 
-                # استرجاع الصورة المحللة وعرضها
                 det_img = base64_to_image(found_report.get("detected_image"))
                 if det_img:
                     st.image(det_img, caption="الصورة المحللة للبلاغ", use_container_width=True)
@@ -262,9 +249,7 @@ elif st.session_state["current_page"] == "متابعة بلاغ":
                 st.error("لم يتم العثور على بلاغ بهذا الرقم. الرجاء التأكد من الرقم والمحاولة مرة أخرى.")
 
 
-# =========================================================
-# 4. صفحة دخول البلدية
-# =========================================================
+# 5. صفحة دخول البلدية
 elif st.session_state["current_page"] == "دخول البلدية":
 
     if st.button("العودة للقائمة الرئيسية", key="back_home2"):
@@ -305,7 +290,6 @@ elif st.session_state["current_page"] == "دخول البلدية":
 
         st.divider()
 
-        # جلب البلاغات من Supabase مرتبة من الأحدث إلى الأقدم
         response = supabase.table("potholes_reports").select("*").order("id", desc=True).execute()
         reports = response.data if response.data else []
 
