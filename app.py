@@ -1,3 +1,10 @@
+import os
+import sys
+
+# إضافة مسار مكتبات النظام
+os.environ["LD_LIBRARY_PATH"] = "/usr/lib/x86_64-linux-gnu:" + os.environ.get("LD_LIBRARY_PATH", "")
+
+# استدعاء جميع مكتباتك العادية (بدون حذف أي وحدة منها)
 import streamlit as st
 from ultralytics import YOLO
 from PIL import Image
@@ -5,7 +12,7 @@ import tempfile
 import io
 import base64
 from datetime import datetime
-from supabase import create_client, Client
+from supabase import create_client, Client 
 
 
 # 1. إعداد الصفحة والاتصال بـ Supabase
