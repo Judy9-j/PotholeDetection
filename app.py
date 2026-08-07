@@ -8,14 +8,18 @@ import os
 from datetime import datetime
 from supabase import create_client, Client
 
-# 1. إعداد الصفحة والاتصال بـ Supabase
+# إعداد الصفحة
 st.set_page_config(
     page_title="نظام كشف الحفريات ومتابعتها",
     layout="wide"
 )
 
-SUPABASE_URL = os.secrets["SUPABASE_URL"]
-SUPABASE_KEY = os.secrets["SUPABASE_KEY"]
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    st.error("لم يتم العثور على متغيرات Supabase.")
+    st.stop()
 
 @st.cache_resource
 def init_supabase() -> Client:
