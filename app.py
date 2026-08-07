@@ -4,6 +4,7 @@ from PIL import Image
 import tempfile
 import io
 import base64
+import os
 from datetime import datetime
 from supabase import create_client, Client
 
@@ -13,8 +14,8 @@ st.set_page_config(
     layout="wide"
 )
 
-SUPABASE_URL = st.secrets["SUPABASE_URL"]
-SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+SUPABASE_URL = os.secrets["SUPABASE_URL"]
+SUPABASE_KEY = os.secrets["SUPABASE_KEY"]
 
 @st.cache_resource
 def init_supabase() -> Client:
